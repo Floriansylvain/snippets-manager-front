@@ -1,51 +1,61 @@
 <script setup lang="ts">
-import { useSettingsStore } from '@/stores/settings'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const settingsStore = useSettingsStore()
 
 const navItems = [
 	{
 		name: 'Dashboard',
-		active: router.currentRoute.value.path === '/'
+		icon: 'mdi-view-dashboard',
+		path: '/'
 	},
 	{
 		name: 'Categories',
-		active: router.currentRoute.value.path === '/categories'
-	},
-	{
-		name: 'snippets',
-		active: router.currentRoute.value.path === '/snippets'
+		icon: 'mdi-shape-plus',
+		path: '/categories'
 	}
+	// {
+	// 	name: 'Snippets',
+	// 	icon: 'mdi-code-braces-box',
+	// 	path: '/snippets'
+	// },
+	// {
+	// 	name: 'Account',
+	// 	icon: 'mdi-account-box',
+	// 	path: '/account'
+	// }
 ]
 </script>
 
 <template>
-	<VNavigationDrawer :width="300" persistent>
-		<VListItem title="SnippetsManager" subtitle="by Florian Sylvain" class="py-2"></VListItem>
-		<VDivider></VDivider>
+	<VNavigationDrawer :width="300" persistent permanent>
+		<VListItem title="SnippetsManager" subtitle="by Florian Sylvain" class="py-2" />
+		<VDivider />
 		<VList class="pa-0">
 			<VListItem
 				v-for="item of navItems"
 				:key="item.name"
 				:title="item.name"
-				:active="item.active"
+				:active="(() => router.currentRoute.value.path === item.path)()"
+				:prepend-icon="item.icon"
+				:to="item.path"
 				class="ma-2"
 				color="primary"
 				rounded
-				link
-			></VListItem>
+			/>
 		</VList>
 		<template v-slot:append>
-			<div class="d-flex align-center ga-2 pa-2">
-				<VBtn variant="tonal" class="flex-grow-1" color="error"> Logout </VBtn>
-				<VBtn
-					variant="plain"
-					icon="mdi-theme-light-dark"
-					:onclick="settingsStore.switchDarkMode"
-				></VBtn>
-			</div>
+			<VListItem
+				prepend-icon="mdi-logout"
+				to="/login"
+				class="ma-2"
+				color="error"
+				variant="plain"
+				active
+				rounded
+			>
+				Disconnect
+			</VListItem>
 		</template>
 	</VNavigationDrawer>
 </template>
