@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import { useCookie } from '@/composables/cookies'
+import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const authStore = useAuthStore()
+const cookie = useCookie()
 
 const navItems = [
 	{
@@ -25,6 +29,12 @@ const navItems = [
 	// 	path: '/account'
 	// }
 ]
+
+function disconnect(): void {
+	authStore.postLogout()
+	cookie.setCookie('loggedIn', '', 0)
+	router.push('/login')
+}
 </script>
 
 <template>
@@ -47,12 +57,12 @@ const navItems = [
 		<template v-slot:append>
 			<VListItem
 				prepend-icon="mdi-logout"
-				to="/login"
 				class="ma-2"
 				color="error"
 				variant="plain"
 				active
 				rounded
+				@click="disconnect"
 			>
 				Disconnect
 			</VListItem>

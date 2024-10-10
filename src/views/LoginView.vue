@@ -1,11 +1,32 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { ref, type Ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-const valid = ref()
-const email = ref()
-const emailRules = ref()
-const password = ref()
-const passwordRules = ref()
+const router = useRouter()
+const authStore = useAuthStore()
+
+const valid: Ref<boolean> = ref(false)
+const email: Ref<string> = ref('')
+const emailRules: Ref<Array<(v: string) => boolean | string>> = ref([
+	(value) => {
+		if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return true
+		return 'E-mail must respect standard e-mails format.'
+	}
+])
+const password: Ref<string> = ref('')
+
+const errorMessage: Ref<string> = ref('')
+
+async function onSubmit(): Promise<void> {
+	if (!valid.value) return
+	const loginPromise = await authStore.postLogin({ email: email.value, password: password.value })
+	if (!loginPromise.ok) {
+		errorMessage.value = 'Wrong e-mail and/or password.'
+		return
+	}
+	router.push('/')
+}
 </script>
 
 <template>
@@ -14,33 +35,37 @@ const passwordRules = ref()
 		<VCard max-width="350" class="w-100 pa-2" variant="flat">
 			<VCardTitle>Login</VCardTitle>
 			<VCardSubtitle>Enter your credentials to log in.</VCardSubtitle>
-			<VForm v-model="valid" class="pa-4 d-flex flex-column ga-4">
+			<VForm v-model="valid" class="pa-4 d-flex flex-column ga-2" @submit.prevent="onSubmit">
 				<VTextField
-					color="primary"
 					v-model="email"
 					:rules="emailRules"
 					label="E-mail"
-					hide-details
-					required
 					type="email"
+					variant="outlined"
+					color="primary"
+					hide-details="auto"
+					required
 				/>
-				<div class="d-flex flex-column ga-1">
+				<div class="d-flex flex-column">
 					<VTextField
-						color="primary"
 						v-model="password"
-						:rules="passwordRules"
 						label="Password"
-						hide-details
-						required
 						type="password"
+						variant="outlined"
+						color="primary"
+						hide-details="auto"
+						required
 						autocomplete
 					/>
 					<VBtn variant="plain" color="primary-darken-1" size="small" class="pa-0 align-self-start">
 						Reset password
 					</VBtn>
 				</div>
+				<p v-if="errorMessage !== ''" class="text-body-1" style="color: rgb(var(--v-theme-error))">
+					{{ errorMessage }}
+				</p>
 				<section class="d-flex flex-column ga-2">
-					<VBtn variant="flat" color="primary">Log in</VBtn>
+					<VBtn variant="flat" color="primary" type="submit" :disabled="!valid">Log in</VBtn>
 					<VBtn variant="outlined" color="primary">Create account</VBtn>
 				</section>
 			</VForm>

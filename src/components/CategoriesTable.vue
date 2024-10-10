@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useCategoriesStore } from '@/stores/categories'
+import { onMounted, ref, type Ref } from 'vue'
+
 interface Category {
 	categories: {
 		id: number
@@ -15,6 +18,14 @@ interface Category {
 	}
 	total: number
 }
+
+const categoriesStore = useCategoriesStore()
+const fetchedCategories: Ref<Category | undefined> = ref()
+
+onMounted(async () => {
+	const categoriesPromise = await categoriesStore.getCategories()
+	fetchedCategories.value = await categoriesPromise.json()
+})
 </script>
 
 <template>
@@ -23,15 +34,7 @@ interface Category {
 			{ title: 'Name', key: 'name', sortable: true },
 			{ title: 'Actions', key: 'actions', align: 'end', sortable: false }
 		]"
-		:items="[
-			{ name: 'pouet' },
-			{ name: 'pouet' },
-			{ name: 'pouet' },
-			{ name: 'pouet' },
-			{ name: 'pouet' },
-			{ name: 'pouet' },
-			{ name: 'pouet' }
-		]"
+		:items="fetchedCategories?.categories"
 	>
 		<template
 			v-slot:[`item.actions`]="{
