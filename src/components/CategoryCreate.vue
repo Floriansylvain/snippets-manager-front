@@ -24,6 +24,7 @@ async function onSubmit(): Promise<void> {
 	const createdCategory: { id: number } = await createdCategoryPromise.json()
 	emit('categoryCreated', createdCategory.id)
 	dialog.value = false
+	name.value = ''
 }
 </script>
 
@@ -50,9 +51,9 @@ async function onSubmit(): Promise<void> {
 						required
 					></VText-field>
 				</VCardText>
-				<VDivider></VDivider>
+				<VDivider />
 				<VCardActions>
-					<VSpacer></VSpacer>
+					<VSpacer />
 					<VBtn color="primary" text="Close" variant="outlined" @click="dialog = false"></VBtn>
 					<VBtn
 						color="primary"

@@ -16,5 +16,12 @@ export const useCategoriesStore = defineStore('categories', () => {
 		})
 	}
 
-	return { getCategories, postCategory }
+	const deleteCategory = async (id: number): Promise<Response> => {
+		return await fetch(`${api.url}/category/${id}`, {
+			...api.options,
+			method: 'DELETE'
+		})
+	}
+
+	return { getCategories, postCategory, deleteCategory }
 })

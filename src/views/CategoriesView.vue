@@ -13,7 +13,9 @@ async function updateCategories() {
 	fetchedCategories.value = await categoriesPromise.json()
 }
 
-onMounted(updateCategories)
+onMounted(async () => {
+	await updateCategories()
+})
 </script>
 
 <template>
@@ -21,5 +23,5 @@ onMounted(updateCategories)
 		<h1 class="text-h3">Categories</h1>
 		<CategoryCreate @categoryCreated="updateCategories" />
 	</header>
-	<CategoriesTable :fetched-categories="fetchedCategories" />
+	<CategoriesTable :fetchedCategories="fetchedCategories" @categoryDeleted="updateCategories" />
 </template>
