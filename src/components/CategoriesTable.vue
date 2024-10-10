@@ -1,31 +1,9 @@
 <script setup lang="ts">
-import { useCategoriesStore } from '@/stores/categories'
-import { onMounted, ref, type Ref } from 'vue'
+import type { Category } from '@/composables/category'
 
-interface Category {
-	categories: {
-		id: number
-		name: string
-		user_id: number
-	}[]
-	pagination: {
-		skip: number
-		take: number
-	}
-	links: {
-		next: string
-		prev: string
-	}
-	total: number
-}
-
-const categoriesStore = useCategoriesStore()
-const fetchedCategories: Ref<Category | undefined> = ref()
-
-onMounted(async () => {
-	const categoriesPromise = await categoriesStore.getCategories()
-	fetchedCategories.value = await categoriesPromise.json()
-})
+const props = defineProps<{
+	fetchedCategories: Category | undefined
+}>()
 </script>
 
 <template>
@@ -34,7 +12,7 @@ onMounted(async () => {
 			{ title: 'Name', key: 'name', sortable: true },
 			{ title: 'Actions', key: 'actions', align: 'end', sortable: false }
 		]"
-		:items="fetchedCategories?.categories"
+		:items="props.fetchedCategories?.categories"
 	>
 		<template
 			v-slot:[`item.actions`]="{

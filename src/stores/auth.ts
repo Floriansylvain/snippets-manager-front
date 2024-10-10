@@ -13,10 +13,9 @@ export const useAuthStore = defineStore('auth', () => {
 
 	const postLogin = async (credentials: LoginFields): Promise<Response> => {
 		const loginPromise = await fetch(`${api.url}/session/login`, {
-			headers: { 'Content-Type': 'application/json' },
+			...api.options,
 			method: 'POST',
-			body: JSON.stringify(credentials),
-			credentials: 'include'
+			body: JSON.stringify(credentials)
 		})
 		cookie.setCookie('loggedIn', new Date(new Date().getTime() + 7200000).toString())
 		return loginPromise
@@ -24,9 +23,8 @@ export const useAuthStore = defineStore('auth', () => {
 
 	const postLogout = async (): Promise<Response> => {
 		return await fetch(`${api.url}/session/logout`, {
-			headers: { 'Content-Type': 'application/json' },
-			method: 'POST',
-			credentials: 'include'
+			...api.options,
+			method: 'POST'
 		})
 	}
 

@@ -39,7 +39,7 @@ async function onSubmit(): Promise<void> {
 				<VTextField
 					v-model="email"
 					:rules="emailRules"
-					label="E-mail"
+					label="E-mail*"
 					type="email"
 					variant="outlined"
 					color="primary"
@@ -49,7 +49,7 @@ async function onSubmit(): Promise<void> {
 				<div class="d-flex flex-column">
 					<VTextField
 						v-model="password"
-						label="Password"
+						label="Password*"
 						type="password"
 						variant="outlined"
 						color="primary"
