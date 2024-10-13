@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Category } from '@/composables/category'
 import { useCategoriesStore } from '@/stores/categories'
-import { ref, type Ref } from 'vue'
+import { ref, watch, type Ref } from 'vue'
 
 interface CategoryItem {
 	id: number
@@ -16,6 +16,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
 	categoriesUpdated: []
+	categoriesIdsToDeleteUpdated: [ids: number[]]
 }>()
 
 const categoriesStore = useCategoriesStore()
@@ -25,6 +26,8 @@ const deleteDialogCategory: Ref<CategoryItem | undefined> = ref()
 
 const itemsPerPageGlob: Ref<number> = ref(10)
 const itemsPage: Ref<number> = ref(0)
+
+const itemsSelected: Ref<number[]> = ref([])
 
 function onDeleteClick(category: CategoryItem) {
 	deleteDialogCategory.value = category
@@ -57,11 +60,23 @@ async function loadItems({
 	else categoriesStore.updateSort(undefined, undefined)
 	emit('categoriesUpdated')
 }
+
+watch(itemsSelected, (newItemsSelected) => {
+	emit('categoriesIdsToDeleteUpdated', newItemsSelected)
+})
+
+watch(
+	() => props.fetchedCategories,
+	() => {
+		itemsSelected.value = []
+	}
+)
 </script>
 
 <template>
 	<VDataTableServer
 		:headers="[
+			{ title: 'ID', key: 'id', sortable: true },
 			{ title: 'Name', key: 'name', sortable: true },
 			{ title: 'Actions', key: 'actions', align: 'end', sortable: false }
 		]"
@@ -69,7 +84,9 @@ async function loadItems({
 		:loading="props.loading"
 		:items-length="props.itemsTotal"
 		v-model:items-per-page="itemsPerPageGlob"
+		v-model="itemsSelected"
 		@update:options="loadItems"
+		show-select
 	>
 		<template v-slot:[`item.actions`]="{ item }">
 			<VBtn icon="mdi-pencil" variant="flat" size="small"></VBtn>
