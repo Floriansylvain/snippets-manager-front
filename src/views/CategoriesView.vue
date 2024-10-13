@@ -7,21 +7,28 @@ import { onMounted, ref, type Ref } from 'vue'
 
 const categoriesStore = useCategoriesStore()
 const fetchedCategories: Ref<Category | undefined> = ref()
+const loading: Ref<boolean> = ref(true)
 
-async function updateCategories() {
+async function fetchCategories() {
 	const categoriesPromise = await categoriesStore.getCategories()
 	fetchedCategories.value = await categoriesPromise.json()
+	loading.value = false
 }
 
 onMounted(async () => {
-	await updateCategories()
+	await fetchCategories()
 })
 </script>
 
 <template>
 	<header class="d-flex align-center justify-space-between">
 		<h1 class="text-h3">Categories</h1>
-		<CategoryCreate @categoryCreated="updateCategories" />
+		<CategoryCreate @categoryCreated="fetchCategories" />
 	</header>
-	<CategoriesTable :fetchedCategories="fetchedCategories" @categoryDeleted="updateCategories" />
+	<CategoriesTable
+		@categoriesUpdated="fetchCategories"
+		:fetchedCategories="fetchedCategories"
+		:loading="loading"
+		:itemsTotal="fetchedCategories?.total ?? 0"
+	/>
 </template>

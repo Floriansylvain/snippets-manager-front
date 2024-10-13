@@ -3,7 +3,7 @@ import { useCategoriesStore } from '@/stores/categories'
 import { ref, type Ref } from 'vue'
 
 const emit = defineEmits<{
-	categoryCreated: [id: number]
+	categoryCreated: []
 }>()
 
 const dialog: Ref<boolean> = ref(false)
@@ -20,9 +20,8 @@ const nameRules: Ref<Array<(v: string) => boolean | string>> = ref([
 const categoriesStore = useCategoriesStore()
 
 async function onSubmit(): Promise<void> {
-	const createdCategoryPromise = await categoriesStore.postCategory(name.value)
-	const createdCategory: { id: number } = await createdCategoryPromise.json()
-	emit('categoryCreated', createdCategory.id)
+	await categoriesStore.postCategory(name.value)
+	emit('categoryCreated')
 	dialog.value = false
 	name.value = ''
 }

@@ -10,16 +10,21 @@ interface CategoryItem {
 
 const props = defineProps<{
 	fetchedCategories: Category | undefined
+	loading: boolean
+	itemsTotal: number
 }>()
 
 const emit = defineEmits<{
-	categoryDeleted: [id: number]
+	categoriesUpdated: []
 }>()
 
 const categoriesStore = useCategoriesStore()
 
 const deleteDialog: Ref<boolean> = ref(false)
 const deleteDialogCategory: Ref<CategoryItem | undefined> = ref()
+
+const itemsPerPageGlob: Ref<number> = ref(10)
+const itemsPage: Ref<number> = ref(0)
 
 function onDeleteClick(category: CategoryItem) {
 	deleteDialogCategory.value = category
@@ -28,25 +33,49 @@ function onDeleteClick(category: CategoryItem) {
 
 async function deleteCategory() {
 	const categoryPromise = await categoriesStore.deleteCategory(deleteDialogCategory.value?.id ?? -1)
-	const response = await categoryPromise.json()
-	emit('categoryDeleted', response.id)
+	await categoryPromise.json()
+	const skip = itemsPage.value === 1 ? 0 : (itemsPage.value - 1) * itemsPerPageGlob.value
+	categoriesStore.updateSkipTake(skip, itemsPerPageGlob.value)
+	emit('categoriesUpdated')
 	deleteDialog.value = false
+}
+
+async function loadItems({
+	page,
+	itemsPerPage,
+	sortBy
+}: {
+	page: number
+	itemsPerPage: number
+	sortBy: { key: string; order: 'asc' | 'desc' }[]
+}) {
+	itemsPage.value = page
+	itemsPerPageGlob.value = itemsPerPage
+	const skip = page === 1 ? 0 : (page - 1) * itemsPerPage
+	categoriesStore.updateSkipTake(skip, itemsPerPage)
+	if (sortBy[0]) categoriesStore.updateSort(sortBy[0].key, sortBy[0].order)
+	else categoriesStore.updateSort(undefined, undefined)
+	emit('categoriesUpdated')
 }
 </script>
 
 <template>
-	<VDataTable
+	<VDataTableServer
 		:headers="[
 			{ title: 'Name', key: 'name', sortable: true },
 			{ title: 'Actions', key: 'actions', align: 'end', sortable: false }
 		]"
 		:items="props.fetchedCategories?.categories"
+		:loading="props.loading"
+		:items-length="props.itemsTotal"
+		v-model:items-per-page="itemsPerPageGlob"
+		@update:options="loadItems"
 	>
 		<template v-slot:[`item.actions`]="{ item }">
 			<VBtn icon="mdi-pencil" variant="flat" size="small"></VBtn>
 			<VBtn icon="mdi-delete" variant="flat" size="small" @click="onDeleteClick(item)" />
 		</template>
-	</VDataTable>
+	</VDataTableServer>
 
 	<VDialog max-width="340" v-model="deleteDialog">
 		<VCard prepend-icon="mdi-delete" title="Delete Category">
